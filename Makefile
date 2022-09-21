@@ -1,21 +1,33 @@
 TARGET := game.pk3
-SOURCE := src
+
+SRC_DIR := src
+ACS_SRC := $(wildcard $(SRC_DIR)/acs/*.acs)
+MAP_SRC := $(wildcard $(SRC_DIR)/maps/*.wad)
+
+# tool paths 
+ACC := acc
+NODE_BUILDER := zdbsp
+ZDOOM := gzdoom
+ZIP := zip -r
 
 all: $(TARGET)
 
-$(TARGET): 
+$(TARGET): acs 
 	rm -f $(TARGET)
-	cd $(SOURCE) && zip -r $(TARGET) *
-	mv $(SOURCE)/$(TARGET) ./$(TARGET)
+	cd $(SRC_DIR) && $(ZIP) $(TARGET) *
+	mv $(SRC_DIR)/$(TARGET) ./$(TARGET)
 
 clean:
 	rm -f $(TARGET)
 
 acs:
-	acc src/acs/script.acs src/acs/script
+	$(foreach var,$(ACS_SRC),$(ACC) $(var);)
 
-test: 
-	gzdoom -file $(SOURCE)/
+nodes:
+	$(NODE_BUILDER) "$(MAP_SRC)"
+
+test: acs
+	gzdoom -file $(SRC_DIR)/
 
 testbuild: $(TARGET)
 	gzdoom -file $(TARGET)
